@@ -195,7 +195,7 @@ AES_RETURN aes_init(void)
 
 #define gf_inv(x)   ((x) ? pow[ 255 - log[x]] : 0)
 
-#else 
+#else
 
 /*  It will generally be sensible to use tables to compute finite
     field multiplies and inverses but where memory is scarse this
@@ -221,7 +221,7 @@ static uint_8t hibit(const uint_32t x)
 static uint_8t gf_inv(const uint_8t x)
 {   uint_8t p1 = x, p2 = BPOLY, n1 = hibit(x), n2 = 0x80, v1 = 1, v2 = 0;
 
-    if(x < 2) 
+    if(x < 2)
         return x;
 
     for( ; ; )
@@ -229,20 +229,20 @@ static uint_8t gf_inv(const uint_8t x)
         if(n1)
             while(n2 >= n1)             /* divide polynomial p2 by p1    */
             {
-                n2 /= n1;               /* shift smaller polynomial left */ 
+                n2 /= n1;               /* shift smaller polynomial left */
                 p2 ^= (p1 * n2) & 0xff; /* and remove from larger one    */
-                v2 ^= v1 * n2;          /* shift accumulated value and   */ 
+                v2 ^= v1 * n2;          /* shift accumulated value and   */
                 n2 = hibit(p2);         /* add into result               */
             }
         else
             return v1;
 
-        if(n2)                          /* repeat with values swapped    */ 
+        if(n2)                          /* repeat with values swapped    */
             while(n1 >= n2)
             {
-                n1 /= n2; 
-                p1 ^= p2 * n1; 
-                v1 ^= v2 * n1; 
+                n1 /= n2;
+                p1 ^= p2 * n1;
+                v1 ^= v2 * n1;
                 n1 = hibit(p1);
             }
         else
@@ -388,4 +388,3 @@ AES_RETURN aes_init(void)
 #if defined(__cplusplus)
 }
 #endif
-

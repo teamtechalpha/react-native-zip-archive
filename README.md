@@ -5,7 +5,7 @@ Zip archive utility for react-native
 ## Installation
 
 ```bash
-npm install react-native-zip-archive --save
+npm install --save https://github.com/teamtechalpha/react-native-zip-archive.git#ios-unzip
 ```
 
 ## Linking
@@ -127,7 +127,7 @@ refer to the [official guide](https://facebook.github.io/react-native/docs/linki
 import it into your code
 
 ```js
-import { zip, unzip, unzipAssets, subscribe } from 'react-native-zip-archive'
+import { zip, unzip, unzipAssets, subscribe, isPasswordProtected, unzipWithPassword } from 'react-native-zip-archive'
 ```
 
 you may also want to use something like [react-native-fs](https://github.com/johanneslumpe/react-native-fs) to access the file system (check its repo for more information)
@@ -175,6 +175,44 @@ unzip(sourcePath, targetPath)
   console.log(error)
 })
 ```
+
+**isPasswordProtected(source: string) :Promise**
+
+> resolves true/false if file is password protected or not
+
+```js
+const sourcePath = `${DocumentDirectoryPath}/myFile.zip`
+const targetPath = DocumentDirectoryPath
+
+isPasswordProtected(sourcePath)
+.then((isProtected) => {
+  console.log(`Is Protected ${isProtected}`)
+})
+.catch((error) => {
+  console.log(error)
+})
+```
+
+**unzipWithPassword(source: string, target: string, password: string): Promise**
+
+> unzips from source to target
+
+Example
+
+```js
+const sourcePath = `${DocumentDirectoryPath}/myFile.zip`
+const targetPath = DocumentDirectoryPath
+const password = "password"
+
+unzipWithPassword(sourcePath, targetPath, password)
+.then((path) => {
+  console.log(`unzip completed at ${path}`)
+})
+.catch((error) => {
+  console.log(error)
+})
+```
+
 
 **unzipAssets(assetPath: string, target: string): Promise**
 

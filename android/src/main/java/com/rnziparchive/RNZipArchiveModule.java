@@ -11,6 +11,9 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -27,11 +30,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
-
-import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.model.FileHeader;
-import net.lingala.zip4j.progress.ProgressMonitor;
 
 public class RNZipArchiveModule extends ReactContextBaseJavaModule {
   private static final String TAG = RNZipArchiveModule.class.getSimpleName();
@@ -61,7 +59,7 @@ public class RNZipArchiveModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void unzip(final String zipFilePath, final String destDirectory,
+  public void unzipWithPassword(final String zipFilePath, final String destDirectory,
         final String password, final Promise promise) {
     new Thread(new Runnable() {
       @Override
@@ -70,8 +68,6 @@ public class RNZipArchiveModule extends ReactContextBaseJavaModule {
           net.lingala.zip4j.core.ZipFile zipFile = new net.lingala.zip4j.core.ZipFile(zipFilePath);
           if (zipFile.isEncrypted()) {
             zipFile.setPassword(password);
-          } else {
-            promise.reject(null, String.format("Zip file: %s is not password protected", zipFilePath));
           }
 
           List fileHeaderList = zipFile.getFileHeaders();
@@ -89,8 +85,16 @@ public class RNZipArchiveModule extends ReactContextBaseJavaModule {
           }
           promise.resolve(Arguments.fromList(extractedFileNames));
         } catch (ZipException ex) {
+          int mappedCode = 0;
+
+          if (ex.getLocalizedMessage().contains("Wrong Password")) {
+            mappedCode = -3;
+          } else if (ex.getLocalizedMessage().contains("zip file does not exist")) {
+            mappedCode = -1;
+          }
+
           updateProgress(0, 1, zipFilePath); // force 0%
-          promise.reject(null, String.format("Failed to unzip file, due to: %s", getStackTrace(ex)));
+          promise.reject("" + mappedCode, String.format("%s: %s", ex.getLocalizedMessage(), getStackTrace(ex)));
         }
       }
     }).start();

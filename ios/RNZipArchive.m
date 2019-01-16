@@ -40,6 +40,37 @@ RCT_EXPORT_METHOD(unzip:(NSString *)from
     }
 }
 
+RCT_EXPORT_METHOD(unzipWithPassword:(NSString *)from
+                  destinationPath:(NSString *)destinationPath
+                  password:(NSString *)password
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+
+    [self zipArchiveProgressEvent:0 total:1 filePath:from]; // force 0%
+
+
+    NSError *error;
+    BOOL success = [RNZASSZipArchive unzipFileAtPath:from toDestination:destinationPath overwrite:true password:password error:&error delegate:self];
+
+    [self zipArchiveProgressEvent:1 total:1 filePath:from]; // force 100%
+
+    if (success) {
+        resolve(destinationPath);
+    } else {
+        NSString *errorCode = [NSString stringWithFormat:@"%ld", (long)error.code];
+        reject(errorCode, error.localizedDescription, error);
+    }
+}
+
+RCT_EXPORT_METHOD(isPasswordProtected:(NSString *)zipFilePath
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+
+    BOOL isProtected = [RNZASSZipArchive isFilePasswordProtectedAtPath:zipFilePath];
+    NSNumber *result = [NSNumber numberWithBool:isProtected];
+    resolve(result);
+}
+
 RCT_EXPORT_METHOD(zip:(NSString *)from
                   destinationPath:(NSString *)destinationPath
                   resolver:(RCTPromiseResolveBlock)resolve
